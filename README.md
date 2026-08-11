@@ -76,7 +76,7 @@ wm.isMounted // 是否挂载
 
 - [指南](https://cnguu.github.io/watermark/guide/getting-started)
 - [API](https://cnguu.github.io/watermark/api/watermark)
-- [在线演示](https://cnguu.github.io/watermark/playground/)
+- [在线演示](https://cnguu.github.io/watermark/playground)
 
 ## 开发
 

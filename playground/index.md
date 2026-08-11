@@ -11,7 +11,7 @@ hero:
       link: /guide/getting-started
     - theme: alt
       text: 在线演示
-      link: /playground/
+      link: /playground
     - theme: alt
       text: GitHub
       link: https://github.com/cnguu/watermark

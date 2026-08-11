@@ -24,7 +24,7 @@ description: core 包源码架构、模块拆分与编码约束
 2. **SSR 安全** — 所有 DOM 访问必须用 `typeof document !== 'undefined'` / `typeof window !== 'undefined'` 守卫（见 [canvas.ts](mdc:packages/core/src/canvas.ts) 与 [watermark.ts](mdc:packages/core/src/watermark.ts)）
 3. **Android 6 兼容** — 禁用 `OffscreenCanvas` / `Proxy` / `Reflect`；`MutationObserver`（Chrome 18+）可用，`ResizeObserver` 缺失时回退到 `window.resize`
 4. **单次绘制** — Canvas 仅在 `create` / `update` 时绘制一次，resize 期间靠 CSS `background-repeat` 平铺，**不要**在 resize 回调里重绘 canvas
-5. **防篡改异步化** — 恢复动作通过 `setTimeout(0)` + `reentrancyGuard` 防止与用户连续操作死锁
+5. **防篡改异步化** — 恢复动作通过 `setTimeout(0)` + `reentrancyGuard` 防止与用户连续操作死锁。所有内部修改 style/childList 的方法（`paint`、`update`、`show`、`hide`）都必须通过 `withGuard()` 包裹，保证自身触发的 MutationObserver 回调被忽略
 6. **多实例隔离** — 每个实例独立 `uid`、独立 DOM 节点（`data-watermark` 属性）、独立 observer
 
 ## 实例 API 契约

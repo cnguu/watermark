@@ -35,11 +35,22 @@ playground/
 
 ## 交互演示
 
-[playground/playground/index.md](mdc:playground/playground/index.md) 使用 VitePress 的 Vue SFC 支持：
-- `reactive` 状态绑定 18 个选项
-- `@change` / `@input` 触发 `wm.update()`
+演示由两部分组成：
+1. **页面文件** [playground/playground.md](mdc:playground/playground.md) — markdown 内容，引用 `<WatermarkDemo />` 组件
+2. **组件文件** [playground/.vitepress/theme/components/WatermarkDemo.vue](mdc:playground/.vitepress/theme/components/WatermarkDemo.vue) — Vue SFC 实际组件
+3. **主题入口** [playground/.vitepress/theme/index.ts](mdc:playground/.vitepress/theme/index.ts) — 通过 `enhanceApp` 自动注册全局组件 `WatermarkDemo`
+
+### 关键注意事项
+
+**VitePress 2.0 alpha 中，markdown 文件里的 HTML 模板不会被 Vue 模板编译器处理**——只有 `<script setup>` 中的代码会执行。因此必须使用 `.vue` SFC + 全局注册组件的方式。
+
+### 组件实现要点
+
+- `reactive` 状态绑定 18+ 个选项
+- `@input` / `@change` 触发 `wm.update({ ...opts, container: previewRef.value })`
 - 预览区是 `position: relative` 的 div，水印用 `onlyViewport: false` + `container` 指向预览区
 - `onBeforeUnmount` 必须 `wm?.destroy()` 避免路由切换泄漏
+- 使用 `<style scoped>` 隔离样式，避免污染全局
 
 ## 编写约定
 
