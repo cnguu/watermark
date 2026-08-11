@@ -1,6 +1,6 @@
 {
   "name": "@cnguu/watermark",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Generating image watermarks using canvas",
   "keywords": [
     "watermark",
