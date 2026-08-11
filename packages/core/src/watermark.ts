@@ -87,23 +87,29 @@ class WatermarkImpl implements WatermarkInstance {
   update(next?: WatermarkOptions): void {
     if (!next)
       return
-    this.options = this.resolveOptions({ ...this.options, ...next })
-    this.teardownObservers()
-    this.mount()
+    this.withGuard(() => {
+      this.options = this.resolveOptions({ ...this.options, ...next })
+      this.teardownObservers()
+      this.mount()
+    })
   }
 
   show(): void {
     if (!this.node)
       return
     this.hidden = false
-    this.node.style.display = 'block'
+    this.withGuard(() => {
+      this.node!.style.display = 'block'
+    })
   }
 
   hide(): void {
     if (!this.node)
       return
     this.hidden = true
-    this.node.style.display = 'none'
+    this.withGuard(() => {
+      this.node!.style.display = 'none'
+    })
   }
 
   destroy(): void {
@@ -121,6 +127,19 @@ class WatermarkImpl implements WatermarkInstance {
   }
 
   // -- internals -----------------------------------------------------------
+
+  /** Run a mutation while ignoring the MutationObserver callbacks it triggers. */
+  private withGuard<T>(fn: () => T): T {
+    this.reentrancyGuard = true
+    try {
+      return fn()
+    }
+    finally {
+      setTimeout(() => {
+        this.reentrancyGuard = false
+      }, 0)
+    }
+  }
 
   private resolveOptions(input: WatermarkOptions): ResolvedOptions {
     const { container: _inputContainer, ...rest } = input
