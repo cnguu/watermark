@@ -1,0 +1,26 @@
+shellEmulator: true
+
+trustPolicy: no-downgrade
+
+packages:
+  - 'packages/*'
+  - playground
+  - tests
+
+catalog:
+  '@antfu/eslint-config': 9.3.0
+  '@types/node': 26.1.2
+  bumpp: 12.2.0
+  eslint: 10.8.0
+  eslint-plugin-package-json: 1.6.3
+  jsdom: 26.1.0
+  lefthook: 2.1.10
+  tsdown: 0.22.14
+  typescript: 6.0.3
+  vite: 8.2.1
+  vitepress: 2.0.0-alpha.19
+  vitest: 4.1.10
+  vue: 3.5.13
+
+onlyBuiltDependencies:
+  - lefthook

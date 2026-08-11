@@ -1,0 +1,57 @@
+---
+alwaysApply: true
+description: 构建工具链 tsdown 配置、产物格式与发布流程
+---
+
+# 构建与发布
+
+## tsdown（core 构建器）
+
+配置文件：[packages/core/tsdown.config.ts](mdc:packages/core/tsdown.config.ts)。
+
+```ts
+entry: ['src/index.ts']
+format: ['esm', 'cjs']   // 双格式输出
+dts: true                 // 生成 .d.ts / .d.cts
+exports: true             // 自动生成 exports 字段
+clean: true               // 构建前清空 dist
+target: 'esnext'
+platform: 'neutral'       // 中性平台，浏览器+Node 通用
+```
+
+产物位于 `packages/core/dist/`：
+- `index.js` + `index.js.map`（ESM）
+- `index.cjs`（CJS）
+- `index.d.ts` + `index.d.cts`（类型）
+
+## package.json 关键字段
+
+见 [packages/core/package.json](mdc:packages/core/package.json)：
+- `sideEffects: false` — **必须保持**，保证 tree-shaking
+- `type: module` — ESM 优先
+- `exports` 同时提供 `import` / `require`
+- `files: ["dist"]` — 只发布 dist
+- `engines.node: >=24.0.0`（构建环境要求，运行时不强制）
+
+## 构建命令
+
+```bash
+pnpm build        # 构建 core
+pnpm dev          # 监听构建 core
+pnpm play:build   # 构建 VitePress 文档
+```
+
+## 发布流程
+
+1. `pnpm release` — 运行 `bumpp`，按 [bump.config.ts](mdc:bump.config.ts) 只更新 `packages/core/package.json` 的版本号，自动打 tag
+2. `pnpm publish:core` — 构建 + `pnpm --filter @cnguu/watermark publish --access public --no-git-checks`
+
+`--no-git-checks` 用于跳过工作区脏文件检查（playground/tests 是私有包不影响）。
+
+## 约束
+
+- **不要**改 `sideEffects` 为 `true`，会破坏 tree-shaking
+- **不要**在 `files` 之外添加需要发布的文件
+- 新增 entry 时需同步更新 `exports` 字段
+- `platform: 'neutral'` 适合浏览器+Node 通用的库，不要改成 `'node'` 或 `'browser'`
+- 发布前确认 `pnpm typecheck && pnpm test && pnpm lint && pnpm build` 全部通过

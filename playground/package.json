@@ -1,0 +1,21 @@
+{
+  "name": "@cnguu/watermark-playground",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Local playground for @cnguu/watermark",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "vitepress build",
+    "dev": "vitepress dev",
+    "preview": "vitepress preview"
+  },
+  "dependencies": {
+    "@cnguu/watermark": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "catalog:",
+    "vitepress": "catalog:",
+    "vue": "catalog:"
+  }
+}

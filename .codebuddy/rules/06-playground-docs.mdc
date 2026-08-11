@@ -1,0 +1,66 @@
+---
+alwaysApply: true
+description: VitePress 文档站点结构、交互演示与编写约定
+---
+
+# 文档站点（playground）
+
+[playground/](mdc:playground/index.md) 是 VitePress 文档站点，既是说明文档又是实际演示。
+
+## 配置
+
+[playground/.vitepress/config.ts](mdc:playground/.vitepress/config.ts)：
+- `lang: 'zh-CN'`，中文站点
+- `cleanUrls: true`
+- 本地搜索（`search.provider: 'local'`）
+- 三个顶级导航：指南 / API / 演示
+
+## 目录结构
+
+```
+playground/
+├─ index.md              # 首页（home layout，hero + features）
+├─ guide/
+│  ├─ getting-started.md # 安装、基础用法、框架集成（Vue/React/Svelte）、tree-shaking
+│  ├─ options.md         # 全部选项说明 + 默认值表
+│  ├─ anti-tamper.md     # 防篡改原理（watchStyle/watchDestroy/多实例/性能）
+│  └─ compatibility.md   # 兼容性（Android 6 / SSR / API 表 / 已知限制）
+├─ api/
+│  ├─ watermark.md       # Watermark 类 + WatermarkInstance 方法
+│  ├─ draw-tile.md       # drawTile 函数
+│  └─ utils.md           # 工具函数清单
+└─ playground/
+   └─ index.md           # 在线交互演示（Vue SFC，实时调参）
+```
+
+## 交互演示
+
+[playground/playground/index.md](mdc:playground/playground/index.md) 使用 VitePress 的 Vue SFC 支持：
+- `reactive` 状态绑定 18 个选项
+- `@change` / `@input` 触发 `wm.update()`
+- 预览区是 `position: relative` 的 div，水印用 `onlyViewport: false` + `container` 指向预览区
+- `onBeforeUnmount` 必须 `wm?.destroy()` 避免路由切换泄漏
+
+## 编写约定
+
+- 文档语言：**中文**（与 `lang: 'zh-CN'` 一致）
+- 代码块用 ` ```ts ` / ` ```bash ` / ` ```vue ` 等标注语言
+- **不要**在文档中写会被 eslint 当作真实代码解析的纯类型签名片段（已通过 `markdown: false` 关闭，但仍建议用完整可运行示例）
+- 新增选项时必须同步更新 [guide/options.md](mdc:playground/guide/options.md) 的选项表 + 默认值代码块
+- 新增 API 时必须同步更新对应的 [api/](mdc:playground/api/watermark.md) 文档
+- 侧边栏分组在 [config.ts](mdc:playground/.vitepress/config.ts) 的 `sidebar` 中维护，新增页面需同步注册
+
+## 命令
+
+```bash
+pnpm play          # vitepress dev（本地开发）
+pnpm play:build    # 构建（输出到 playground/.vitepress/dist）
+pnpm play:preview  # 预览构建产物
+```
+
+## 约束
+
+- playground 是 **私有包**（`private: true`），不发布到 npm
+- `playground/package.json` 只依赖 `@cnguu/watermark: workspace:*` + VitePress/vue/vite（devDependencies）
+- 不要在 playground 中引入额外的运行时依赖
+- 文档构建（`pnpm play:build`）必须通过，CI [deploy-playground.yml](mdc:.github/workflows/deploy-playground.yml) 会部署

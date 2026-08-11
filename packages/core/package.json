@@ -1,0 +1,45 @@
+{
+  "name": "@cnguu/watermark",
+  "version": "0.0.0",
+  "description": "Generating image watermarks using canvas",
+  "keywords": [
+    "watermark",
+    "canvas"
+  ],
+  "homepage": "https://github.com/cnguu/watermark#readme",
+  "bugs": {
+    "url": "https://github.com/cnguu/watermark/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cnguu/watermark.git",
+    "directory": "packages/core"
+  },
+  "license": "Apache-2.0",
+  "author": "cnguu",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch"
+  },
+  "devDependencies": {
+    "tsdown": "catalog:"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

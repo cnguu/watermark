@@ -1,0 +1,44 @@
+{
+  "name": "@cnguu/watermark-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Generating image watermarks using canvas",
+  "homepage": "https://github.com/cnguu/watermark#readme",
+  "bugs": {
+    "url": "https://github.com/cnguu/watermark/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cnguu/watermark.git"
+  },
+  "license": "Apache-2.0",
+  "author": "cnguu",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm --filter @cnguu/watermark build",
+    "dev": "pnpm --filter @cnguu/watermark dev",
+    "preinstall": "npx only-allow pnpm",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "play": "pnpm --filter @cnguu/watermark-playground dev",
+    "play:build": "pnpm --filter @cnguu/watermark-playground build",
+    "play:preview": "pnpm --filter @cnguu/watermark-playground preview",
+    "publish:core": "pnpm build && pnpm --filter @cnguu/watermark publish --access public --no-git-checks",
+    "release": "bumpp",
+    "test": "pnpm --filter @cnguu/watermark-tests test",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "catalog:",
+    "@types/node": "catalog:",
+    "bumpp": "catalog:",
+    "eslint": "catalog:",
+    "eslint-plugin-package-json": "catalog:",
+    "lefthook": "catalog:",
+    "typescript": "catalog:"
+  },
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=10.0.0"
+  }
+}

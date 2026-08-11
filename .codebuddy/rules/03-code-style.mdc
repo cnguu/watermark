@@ -1,0 +1,52 @@
+---
+alwaysApply: true
+description: ESLint 配置、代码风格与 lefthook git hooks
+---
+
+# 代码规范与 Git Hooks
+
+## ESLint
+
+配置文件：[eslint.config.js](mdc:eslint.config.js)，基于 `@antfu/eslint-config`。
+
+### 启用的特性
+
+- `type: 'lib'` — 库模式（更严格的导出规则）
+- `stylistic: true` — 代码风格（缩进、引号、分号等）
+- `typescript: true`
+- `jsonc: true` + `eslint-plugin-package-json`
+- `yaml: true`
+- `markdown: false` — **不** lint markdown 代码块（避免文档中的类型签名片段解析失败）
+
+### 关键规则
+
+- `perfectionist/sort-imports` + `perfectionist/sort-named-imports` — 导入与具名导出按字母序
+- `test/prefer-lowercase-title` — `describe` 标题小写开头
+- `style/no-multiple-empty-lines` — 文件结尾不留空行
+- `regexp/no-unused-capturing-group` — 正则捕获组未使用时报错（用非捕获组 `(?:...)`）
+
+### 命令
+
+```bash
+pnpm lint         # 检查
+pnpm lint:fix     # 自动修复
+```
+
+## Lefthook
+
+配置文件：[lefthook.yml](mdc:lefthook.yml)。
+
+| Hook | Job | 作用范围 |
+| --- | --- | --- |
+| `pre-commit` | `lint` | `*.{js,ts,tsx,mjs,cjs}`，排除 `node_modules` / `dist` / `playground` |
+| `pre-commit` | `typecheck` | `*.{ts,tsx}`，同上排除 |
+| `pre-push` | `test` | 全量 `pnpm test` |
+
+两个 pre-commit job 并行执行。
+
+## 约束
+
+- 提交前必须通过 lint + typecheck（自动）；push 前必须通过 test
+- **不要**在 `playground/**` 下放需要 lint 的 `.ts` 文件（已被 hook 排除），但 VitePress 的 `<script setup>` 仍需手写规范代码
+- 修改 `eslint.config.js` 时注意 `markdown: false` 不能改回 `true`，否则文档中的 TS 签名片段会触发解析错误
+- 新增依赖到 catalog 后，`pnpm-workspace.yaml` 的 `catalog:` 段需同步版本

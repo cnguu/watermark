@@ -1,0 +1,55 @@
+---
+alwaysApply: true
+description: Vitest 测试约定、jsdom 环境与已知限制
+---
+
+# 测试约定
+
+测试包位于 [tests/](mdc:tests/src/index.test.ts)，使用 Vitest + jsdom。
+
+## 配置
+
+[vitest.config.ts](mdc:tests/vitest.config.ts)：
+- `environment: 'jsdom'`
+- `include: ['src/**/*.{test,spec}.ts']`
+- `globals: false` — 必须显式 `import { describe, it, expect, vi } from 'vitest'`
+
+## 命令
+
+```bash
+pnpm test          # vitest run（CI）
+pnpm test:watch    # vitest（监听）
+```
+
+## 已知限制
+
+**jsdom 不实现 Canvas 2D `getContext`**。因此：
+- 涉及 canvas 绘制的测试需先探测 `canvas.getContext('2d')`，缺失时 `return` 跳过（见 `drawTile` 测试块）
+- `drawTile` 在 jsdom 下返回空字符串，**不是 bug**，是环境限制
+- 控制台会打印 `Error: Not implemented: HTMLCanvasElement.prototype.getContext`，不影响测试结果
+
+如需真实 canvas 测试，需安装 `canvas` npm 包（原生依赖，本项目暂不引入）。
+
+## 编写规范
+
+- 每个 `describe` 标题小写开头（受 `test/prefer-lowercase-title` 约束）
+- `beforeEach` 清理 `document.body.innerHTML`，`afterEach` 同样清理 + `vi.useRealTimers()`
+- 使用 `vi.useFakeTimers()` + `vi.runAllTimersAsync()` 测试防篡改的 `setTimeout(0)` 恢复逻辑
+- 每个测试末尾必须 `wm.destroy()` 避免实例泄漏影响后续用例
+- 多实例测试要验证 `id` 唯一 + 节点数量
+- 防篡改测试要覆盖 `watchStyle` / `watchDestroy` 的 `true` / `false` 两种情况
+
+## 测试覆盖范围
+
+当前 [tests/src/index.test.ts](mdc:tests/src/index.test.ts) 覆盖：
+- `defaultOptions` 默认值
+- `Watermark.create` 挂载、容器（元素/选择器/函数）、唯一 id
+- `update` 合并 + no-op
+- `show` / `hide` display 切换
+- `destroy` 节点移除 + observer 断开
+- 防篡改：样式恢复、节点恢复、disable 开关
+- `drawTile`（带 canvas 探测）
+- 多实例隔离
+- `blockInteraction` 的 `pointer-events` 切换
+
+新增功能时必须同步新增对应测试。

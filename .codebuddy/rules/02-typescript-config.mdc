@@ -1,0 +1,36 @@
+---
+alwaysApply: true
+description: TypeScript 配置、类型检查与严格模式约束
+---
+
+# TypeScript 配置
+
+根配置 [tsconfig.json](mdc:tsconfig.json)，core 包继承之。
+
+## 关键编译选项
+
+- `target: esnext` — 输出最新 ES
+- `lib: ["ESNext", "DOM", "DOM.Iterable"]` — **必须包含 DOM lib**，因为 core 操作 DOM（`document` / `HTMLElement` / `MutationObserver` / `CanvasRenderingContext2D` 等）
+- `module: esnext` + `moduleResolution: bundler`
+- `strict: true` + `strictNullChecks: true` — 全严格模式
+- `composite: true` — 项目引用
+- `allowImportingTsExtensions: true`
+
+## 排除范围
+
+根 tsconfig 排除 `playground/**` 与 `tests/**`，它们有自己的 tsconfig：
+- [tests/tsconfig.json](mdc:tests/tsconfig.json) 继承根配置并加 `customConditions: ["source"]`（直接引用 core 源码）
+- playground 由 VitePress 自行处理，不参与根 typecheck
+
+## 类型检查命令
+
+```bash
+pnpm typecheck   # 根 tsc --noEmit
+```
+
+## 约束
+
+- **不要**移除 `DOM` lib，否则 core 源码会报 `Cannot find name 'document'` 等
+- **不要**在 core 中使用 `any` 绕过类型（`utils.ts` 中的 `(...args: any[])` 是工具函数的合理例外）
+- 类型断言尽量用 `as`，避免 `as unknown as` 双重断言；当前 `watermark.ts` 中 `as ResolvedOptions` 是必要的，因为 `container` 字段类型需从函数转换为 `HTMLElement | null`
+- 新增类型导出时，按字母序排列在 [index.ts](mdc:packages/core/src/index.ts) 的 `export type { ... }` 块中

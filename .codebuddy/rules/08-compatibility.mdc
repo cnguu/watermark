@@ -1,0 +1,56 @@
+---
+alwaysApply: true
+description: 兼容性目标（Android 6+）、SSR 安全与禁用 API 清单
+---
+
+# 兼容性约束
+
+## 目标平台
+
+- **最低兼容 Android 6**（Chrome 44+ / WebView 44+）
+- 现代桌面浏览器（Chrome / Edge / Firefox / Safari）
+- Node.js 16+（SSR 安全，DOM 操作跳过）
+
+## 允许使用的 Web API
+
+| API | 最低支持 | 用途 |
+| --- | --- | --- |
+| `document.createElement` | Android 2.1+ | 节点创建 |
+| `Canvas 2D` + `toDataURL` | Android 2.1+ | 瓦片绘制 |
+| `MutationObserver` | Android 5+ (Chrome 18+) | 防篡改监听 |
+| `ResizeObserver` | Android 5+ (Chrome 64+) | 可选，缺失回退 `window.resize` |
+| `setTimeout` | 全平台 | 异步恢复 |
+| `Element.appendChild` / `removeChild` | 全平台 | DOM 操作 |
+
+## 禁用 API（兼容性问题）
+
+- **`OffscreenCanvas`** — Android 6 不支持，必须用 `document.createElement('canvas')`
+- **`Proxy` / `Reflect`** — Android 5 以下不支持
+- **`URL.createObjectURL`** — 部分旧 WebView 有限制
+- **`requestAnimationFrame`** — 未使用（非禁用，但本项目不需要）
+- **ES2015+ `Symbol` / `Map` / `Set`** — Android 5+ 支持，但 core 当前未使用，保持简洁
+
+## SSR 安全
+
+在 Node 等非浏览器环境调用 `Watermark.create()` 不会抛错，但水印不挂载。所有 DOM 访问必须有守卫：
+
+```ts
+if (typeof document === 'undefined')
+  return ''
+if (typeof window !== 'undefined') {
+  window.addEventListener('resize', handler)
+}
+```
+
+参考实现：[canvas.ts](mdc:packages/core/src/canvas.ts) 的 `drawTile`、[watermark.ts](mdc:packages/core/src/watermark.ts) 的 `resolveOptions` / `setupResizeObserver` / `teardownObservers`。
+
+## CSP 注意事项
+
+`canvas.toDataURL` 生成 `data:image/png;base64,...`，在严格 CSP 下需允许 `img-src data:`。文档 [compatibility.md](mdc:playground/guide/compatibility.md) 已说明。
+
+## 约束
+
+- 新增 API 调用前先确认 Android 6 支持
+- 不要引入 polyfill（保持零依赖）；缺失能力时优雅降级（如 `ResizeObserver` → `window.resize`）
+- `disableObserver` 选项用于在极旧引擎关闭 observer，不要移除该逃生舱
+- 修改 [canvas.ts](mdc:packages/core/src/canvas.ts) 时不要改用 `OffscreenCanvas`

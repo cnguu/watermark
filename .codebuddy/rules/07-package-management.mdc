@@ -1,0 +1,64 @@
+---
+alwaysApply: true
+description: pnpm workspace、catalog 版本管理与依赖约束
+---
+
+# 包管理与依赖
+
+## pnpm workspace
+
+[pnpm-workspace.yaml](mdc:pnpm-workspace.yaml) 定义工作区与版本目录（catalog）。
+
+### 工作区包
+
+```yaml
+packages:
+  - 'packages/*'   # core
+  - playground
+  - tests
+```
+
+### catalog 版本锁定
+
+所有共享依赖通过 `catalog:` 引用，版本号集中管理：
+
+```yaml
+catalog:
+  '@antfu/eslint-config': 9.3.0
+  '@types/node': 26.1.2
+  bumpp: 12.2.0
+  eslint: 10.8.0
+  eslint-plugin-package-json: 1.6.3
+  jsdom: 26.1.0
+  lefthook: 2.1.10
+  tsdown: 0.22.14
+  typescript: 6.0.3
+  vite: 8.2.1
+  vitepress: 2.0.0-alpha.19
+  vitest: 4.1.10
+  vue: 3.5.13
+```
+
+子包 `package.json` 中用 `"dep": "catalog:"` 引用。
+
+### onlyBuiltDependencies
+
+```yaml
+onlyBuiltDependencies:
+  - lefthook   # 只允许 lefthook 跑 postinstall 脚本
+```
+
+## engines 约束
+
+- 根 `package.json`：`node >=24.0.0` + `pnpm >=10.0.0`
+- `packages/core`：`node >=24.0.0`（构建环境；运行时兼容 Android 6+）
+- `preinstall` 脚本 `npx only-allow pnpm` 强制使用 pnpm
+
+## 约束
+
+- **core 包零运行时依赖** — [packages/core/package.json](mdc:packages/core/package.json) 不允许有 `dependencies`，只能有 `devDependencies`（仅 `tsdown`）
+- 新增开发依赖时优先加入 `catalog:` 而非写死版本，保持版本统一
+- **不要**用 npm / yarn 安装，会破坏 lockfile（`preinstall` 会拦截）
+- 升级依赖时同步更新 `catalog:` 版本 + `pnpm-lock.yaml`
+- `playground` 与 `tests` 通过 `workspace:*` 依赖 core，本地开发直接引用源码（tests）或构建产物（playground）
+- 安装命令固定为 `pnpm install`，不要带 `--frozen-lockfile` 等额外参数（CI 自行处理）
