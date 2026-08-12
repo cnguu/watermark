@@ -26,4 +26,6 @@ onlyBuiltDependencies:
   - lefthook
 
 allowBuilds:
+  esbuild: true
   lefthook: true
+  workerd: true
