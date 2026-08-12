@@ -24,3 +24,6 @@ catalog:
 
 onlyBuiltDependencies:
   - lefthook
+
+allowBuilds:
+  lefthook: true
